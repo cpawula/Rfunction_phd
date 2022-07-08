@@ -83,3 +83,80 @@ matrix_to_Darwin<-function(genind, file){
 Quickboard<-function(data){
   write.table(data, "clipboard", sep="\t", col.names=TRUE, quote = F,row.names = FALSE)
 }
+# https://gist.github.com/zkamvar/aeaff83b9d126d55aade
+gen2polysat <- function(gen, newploidy = gen@ploidy){
+  if (!require(polysat)){
+    stop("User needs polysat installed")
+  }
+  gen   <- recode_polyploids(gen, newploidy)
+  gendf <- genind2df(gen, sep = "/", usepop = FALSE)
+  gendf <- lapply(gendf, strsplit, "/")
+  gendf <- lapply(gendf, lapply, as.numeric)
+  ambig <- new("genambig", samples = indNames(gen), loci = locNames(gen))
+  for (i in names(gendf)){
+    res <- lapply(gendf[[i]], function(x) ifelse(is.na(x), Missing(ambig), x))
+    Genotypes(ambig, loci = i) <- res
+  }
+  return(ambig)
+}
+
+Clones_removal<-function(genind, threshold = 0){
+  # Cette fonction sert à retirer les clones pour ne garder qu'un individus représentatif 
+  # l'individu retenu sera celui avc le moins de données manquantes
+  # un objet genind est retourné
+  # Dependences : Polysat, Poppr, tidyverse
+  # crée le 06 70 2022 par Clovis
+  dist_ind<-diss.dist(genind,percent = TRUE, mat = TRUE)
+  # plotdist<-as.data.frame(as.vector(dist_ind))
+  # colnames(plotdist)<-"dist"
+  # ggplot(data = plotdist)+
+  #   geom_density(aes(dist))
+  clone_name<-assignClones(dist_ind,threshold = threshold)%>%as.data.frame()%>%
+    rownames_to_column()%>%
+    reshape::rename(c("rowname"="ind","."="clone" ))%>%
+    rownames_to_column()%>%
+    mutate(rowname = as.integer(rowname))
+  clone_name$missing<-1-propTyped(genind,by="ind") 
+
+  ind_to_kept<-clone_name%>%
+    group_by(clone)%>%
+    slice_min(missing,n = 1,with_ties = FALSE)
+  
+  
+  mdata_cl_rmvd<- genind[i = ind_to_kept$rowname, drop = TRUE]
+  return(mdata_cl_rmvd)
+}
+
+
+recall_genind <- function(allele_tab,correspondance, prs_abs = FALSE) {
+  a<-genind2df(allele_tab,sep = "_")
+  i<-2
+  # allele_tab : un objet genind
+  # Un data.frame des correspondances entre code allélique
+  # Cette fonction permet de passer de changer le code allélique des individus 
+  # Par exemple en remplacant les code des séquence par les code des tailles
+  # Dependance : Poppr
+  for (i in seq(2,length(colnames(a)))) {
+    mark_unique<-filter(correspondance,str_detect(Locus,colnames(a)[i]))
+    replacement<-mark_unique$AlleleLength
+    names(replacement)<-mark_unique$AlleleSeqCode
+    
+    call_lgth<-str_replace_all(as.vector(a[,i]),replacement)
+    a[,i]<-call_lgth
+    i<-i+1
+  }
+  pop<-a$pop
+  a<-a%>%
+    select(-pop)
+  a<-df2genind(X = a,
+               sep = "_",
+               ploidy = allele_tab@ploidy,
+               pop = allele_tab@pop,
+               strata = allele_tab@strata)
+  a@tab
+  if (prs_abs == TRUE) {
+    a@tab[a@tab>1]<-1
+  }
+  
+  return(a)
+}
