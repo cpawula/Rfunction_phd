@@ -133,7 +133,7 @@ recall_genind <- function(allele_tab,correspondance, prs_abs = FALSE) {
   i<-2
   # allele_tab : un objet genind
   # Un data.frame des correspondances entre code allélique
-  # Cette fonction permet de passer de changer le code allélique des individus 
+  # Cette fonction permet de changer le code allélique des individus 
   # Par exemple en remplacant les code des séquence par les code des tailles
   # Dependance : Poppr
   for (i in seq(2,length(colnames(a)))) {
