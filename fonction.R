@@ -165,6 +165,7 @@ VAR_to_genind<-function(VAR_tab,DON_tab){
   #DON_tab chargeable avec read.table("RGal2012_tout20200401.don",header = TRUE,sep = "\t", skip = 2)
   require("tidyverse")
   require("poppr")
+  colnames(DON_tab)[1:2]<-(c("Unit","ind"))
   SSRce_ihc<-VAR_tab%>%
     filter(Unit %in% DON_tab$Unit)
   name_SSRce_ihc<-DON_tab%>%
