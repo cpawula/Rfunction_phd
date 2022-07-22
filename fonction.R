@@ -156,3 +156,26 @@ recall_genind <- function(allele_tab,correspondance, prs_abs = FALSE) {
   
   return(a)
 }
+
+VAR_to_genind<-function(VAR_tab,DON_tab){
+  #Cette fonction sert à obtenir un objet genind à partir d'un .VAR et d'un .DON
+  #Le .DON sert à obtenir le noms des individus
+  #L'objet genind final n'a pas de pop associé ni de strata etc ...
+  #VAR_tab : un data_frame issu d'un .VAR chargeable avec : read.table("RGal2012_tout20200401_CorrectionDM.VAR",header = T, sep = "\t", skip = 2, na.strings = "999")
+  #DON_tab chargeable avec read.table("RGal2012_tout20200401.don",header = TRUE,sep = "\t", skip = 2)
+  require("tidyverse")
+  require("poppr")
+  SSRce_ihc<-VAR_tab%>%
+    filter(Unit %in% DON_tab$Unit)
+  name_SSRce_ihc<-DON_tab%>%
+    filter(Unit %in% SSRce_ihc$Unit)
+  SSRce_ihc$Unit<-name_SSRce_ihc$ind
+  colnames(SSRce_ihc)[1]<-"ind"
+  
+  SSRce_ihc_test<-SSRce_ihc[, colSums(SSRce_ihc != 0, na.rm =TRUE) > 0]
+  
+  colnames(SSRce_ihc_test)<-str_replace(colnames(SSRce_ihc_test),"\\.\\.","\\.999")
+  SSRce_gind<-as.genind(tab = as.matrix(SSRce_ihc_test[,-1]),type = "codom", check_ploidy = TRUE)
+  
+  return(SSRce_gind)
+}
