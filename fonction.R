@@ -30,10 +30,6 @@
 
 #***********************************************************************************************************************
 #####Formatage des données#####
-# print(spe)
-dat <- read.table("data_analysis_8pl/GenotypicTable_AlleleDosage_forTest.txt", sep="", header=TRUE)
-
-
 
 reformat_ssrseq_gt<-function(tab){
   # Cette fonction change le format du tableau de genotype donne en sortie du script de genotypage des individus
