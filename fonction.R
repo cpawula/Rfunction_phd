@@ -184,7 +184,7 @@ VAR_to_genind<-function(VAR_tab,DON_tab){
 }
 
 
-allelic_error_computation<-function(genind){
+allelic_error_computation<-function(genind, ploidy = 2, method = "estimated allele number"){
   # Cette fonction est utilisé pour calculer le taux d'erreur allélique qui est defini tel que
   # Nombre d'erreur / nombre réel d'allèle comparé
   # dependance : poppr, tidyverse
@@ -218,7 +218,13 @@ allelic_error_computation<-function(genind){
     }
     locus_error$allelic_mismatch[which(locus_error$Locus==mark)]<-tot_diff
     locus_error$pair_removed[which(locus_error$Locus==mark)]<-NA_number
-    locus_error$allelic_error_rate[which(locus_error$Locus==mark)]<-tot_diff/nAllele
+    if (method == "estimated allele number") {
+      locus_error$allelic_error_rate[which(locus_error$Locus==mark)]<-tot_diff/((nrow(genind[loc = mark]$tab)-NA_number*2)*ploidy)
+    }
+    if (method == "sum different allele") {
+      locus_error$allelic_error_rate[which(locus_error$Locus==mark)]<-tot_diff/nAllele
+    }
+    
     locus_error$nAllele_compared[which(locus_error$Locus==mark)]<-nAllele
   }  
   return(locus_error)
