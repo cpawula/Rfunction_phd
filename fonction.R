@@ -182,3 +182,44 @@ VAR_to_genind<-function(VAR_tab,DON_tab){
   
   return(SSRce_gind)
 }
+
+
+allelic_error_computation<-function(genind){
+  # Cette fonction est utilisé pour calculer le taux d'erreur allélique qui est defini tel que
+  # Nombre d'erreur / nombre réel d'allèle comparé
+  # dependance : poppr, tidyverse
+  # Un objet genind doit etre mis en entrée
+  locus_error<-as.data.frame(locNames(genind))%>%
+    `colnames<-`(.,"Locus")
+  locus_error$allelic_error_rate<-0
+  locus_error$allelic_mismatch<-0
+  locus_error$pair_removed<-0
+  locus_error$nAllele_compared<-0
+  for (mark in locNames(genind)) {
+    print(mark)
+    # marker1<-genind$tab %>%
+    #   as_tibble()%>%
+    #   select(which(str_detect(colnames(genind$tab),mark)))
+    
+    m<-matrix(data = seq(1:nrow(genind[loc = mark]$tab)),ncol = 2,byrow = TRUE)
+    tot_diff<-0
+    NA_number<-0
+    nAllele<-0
+    for (i in seq(1:(nrow(genind[loc = mark]$tab)/2))){
+      
+      
+      if (anyNA(genind[m[i,],loc = mark]$tab)==FALSE) {
+        a<-genind[m[i,],loc = mark]%>%
+          diss.dist()
+        tot_diff<-tot_diff+a
+        nAllele<-nAllele + sum(genind[m[i,],loc = mark]$tab)
+      }else{NA_number<-NA_number+1}
+      
+    }
+    locus_error$allelic_mismatch[which(locus_error$Locus==mark)]<-tot_diff
+    locus_error$pair_removed[which(locus_error$Locus==mark)]<-NA_number
+    locus_error$allelic_error_rate[which(locus_error$Locus==mark)]<-tot_diff/nAllele
+    locus_error$nAllele_compared[which(locus_error$Locus==mark)]<-nAllele
+  }  
+  return(locus_error)
+}
