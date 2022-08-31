@@ -145,7 +145,7 @@ recall_genind <- function(allele_tab,correspondance, prs_abs = FALSE) {
   }
   pop<-a$pop
   a<-a%>%
-    select(-pop)
+    dplyr::select(-pop)
   a<-df2genind(X = a,
                sep = "_",
                ploidy = allele_tab@ploidy,
