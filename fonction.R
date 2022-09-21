@@ -100,29 +100,58 @@ gen2polysat <- function(gen, newploidy = gen@ploidy){
 
 Clones_removal<-function(genind, threshold = 0){
   # Cette fonction sert à retirer les clones pour ne garder qu'un individus représentatif 
-  # l'individu retenu sera celui avc le moins de données manquantes
-  # un objet genind est retourné
+  # l'individu retenu sera celui avc le moins de données manquantes, il est indiqué dans la dataframe ind_to_keep
+  # une list des trois dataframe est retournée
+  # info_clone = info des distances pairées
+  # Control = info_clone mais avec uniquemetn les individus control
+  # ind_to_keep = individus à conserver si on veut prendre celui avec le moins de missing data
   # Dependences : Polysat, Poppr, tidyverse
-  # crée le 06 70 2022 par Clovis
-  dist_ind<-diss.dist(genind,percent = TRUE, mat = TRUE)
-  # plotdist<-as.data.frame(as.vector(dist_ind))
-  # colnames(plotdist)<-"dist"
-  # ggplot(data = plotdist)+
-  #   geom_density(aes(dist))
+  # Modifée le 21 09 2022 par Clovis
+  library(polysat)
+  library(poppr)
+  library(tidyverse)
+  diagNA <- function(matrix) {
+    
+    diag(matrix)=NA
+    return(matrix)
+  }
+  
+  dist_ind<-dist(genind, method = "canberra", diag = TRUE)
+  
+  
+  
+  dist_ind<-as.matrix(dist_ind)
   clone_name<-assignClones(dist_ind,threshold = threshold)%>%as.data.frame()%>%
     rownames_to_column()%>%
     reshape::rename(c("rowname"="ind","."="clone" ))%>%
     rownames_to_column()%>%
     mutate(rowname = as.integer(rowname))
+  
+  # On calcule le taux de données manquantes de chaque individus pour ne conserver que l'individu ayant le moins de données manquantes par groupe de Clone
   clone_name$missing<-1-propTyped(genind,by="ind") 
-
-  ind_to_kept<-clone_name%>%
+  
+  
+  # On va produire un tableau récapitulant les distances entre paire
+  a<-dist_ind%>%
+    diagNA()
+  info_clone<-as.data.frame(as.table(a))%>%
+    dplyr::filter(!is.na(Freq))%>%
+    mutate(comp = paste(Var2,Var1,sep = "_"))%>%
+    mutate(Clone = Freq < threshold)
+  
+  control<-info_clone%>%
+    dplyr::filter(str_detect(Var1,"_[AB]$") & str_detect(Var2,"_[AB]$"))%>%
+    mutate(rep = str_match(Var1, str_sub(Var2,1,-2))[,1])
+  
+  # On produit un data.frame de noms d'individus à conserver 
+  ind_to_keep<-clone_name%>%
     group_by(clone)%>%
     slice_min(missing,n = 1,with_ties = FALSE)
   
+  output<-list(info_clone,control,ind_to_keep,clone_name)
+  names(output) <- c("info_clone", "control","ind_to_keep", "clone_group")
   
-  mdata_cl_rmvd<- genind[i = ind_to_kept$rowname, drop = TRUE]
-  return(mdata_cl_rmvd)
+  return(output)
 }
 
 
