@@ -262,7 +262,8 @@ allelic_error_computation<-function(genind, ploidy = 2, method = "estimated alle
 safe_write_table<-function(tab,file,sep = "\t", quote = FALSE, row.names = FALSE, col.names = TRUE){
   if (file.exists(paste(file,paste0(str_remove_all(str_sub(Sys.time(),3,10),"-"),".txt"),sep = "_"))==FALSE) {
     write.table(tab,file = paste(file,paste0(str_remove_all(str_sub(Sys.time(),3,10),"-"),".txt"),sep = "_"),col.names = T,row.names = row.names,quote = quote,sep = sep)
-    cat("Le data frame a ete enregistre au format .txt")
+    cat("Le data frame", paste(file,paste0(str_remove_all(str_sub(Sys.time(),3,10),"-"),".txt"),sep = "_") ,"a ete enregistre dans le dossier", getwd())
+    
   }else{cat("Impossible d'enregistrer car le fichier existe déja")}
 }
 
