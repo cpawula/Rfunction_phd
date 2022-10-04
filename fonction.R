@@ -56,7 +56,7 @@ reformat_ssrseq_gt<-function(tab){
 matrix_to_Darwin<-function(genind, file, prsabs = FALSE){
   var_RepA<-as.data.frame(tab(genind))%>%
     rownames_to_column()%>%
-    rename(Unit= rowname)
+    dplyr::rename(Unit= rowname)
   var_RepA[is.na(var_RepA)] = 999
   if (prsabs == TRUE) {
     genind@tab[genind@tab>1]<-1
