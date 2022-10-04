@@ -53,20 +53,28 @@ reformat_ssrseq_gt<-function(tab){
 # colnames(tab)<-str_remove_all(colnames(tab),"\\.")
 # matrix<-df2genind(select(tab,-1),sep = "/",ploidy = 4, ind.names = tab$ind)
 # matrix_to_Darwin(matrix,file = "opti_missing/darwin_format_for_opti")
+
+
 matrix_to_Darwin<-function(genind, file, prsabs = FALSE){
+  
+  if (prsabs == TRUE) {
+    genind@tab[genind@tab>1]<-1
+  }
+  
   var_RepA<-as.data.frame(tab(genind))%>%
     rownames_to_column()%>%
     dplyr::rename(Unit= rowname)
   var_RepA[is.na(var_RepA)] = 999
-  if (prsabs == TRUE) {
-    genind@tab[genind@tab>1]<-1
-  }
+  
   
   Don_RepA<-as.data.frame(var_RepA$Unit)%>%
     rownames_to_column()
   var_RepA$Unit<-rownames(var_RepA)
   colnames(Don_RepA)<-c("Unit", "Geno")
-  line1var<-"@DARwin 5.0 - ALLELIC - 2"
+  if (prsabs == TRUE) {
+    line1var<-"@DARwin 5.0 - SINGLE"
+  }else{line1var<-"@DARwin 5.0 - ALLELIC - 2"}
+  
   line2var<-paste0(nrow(var_RepA),"\t",ncol(var_RepA))
   write(c(line1var,line2var), file = paste0(file,".VAR"),sep = "\t")
   write.table(var_RepA, file = paste0(file,".VAR"), row.names = FALSE,col.names = TRUE,quote = FALSE,sep = "\t",append = TRUE)
