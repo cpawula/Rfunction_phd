@@ -223,7 +223,7 @@ VAR_to_genind<-function(VAR_tab,DON_tab){
 
 allelic_error_computation<-function(genind, ploidy = 2, method = "estimated allele number"){
   # Cette fonction est utilisé pour calculer le taux d'erreur allélique qui est defini tel que
-  # Nombre d'erreur / nombre réel d'allèle comparé
+  # Nombre d'erreur / nombre réel d'allèle comparés
   # dependance : poppr, tidyverse
   # Un objet genind doit etre mis en entrée
   locus_error<-as.data.frame(locNames(genind))%>%
