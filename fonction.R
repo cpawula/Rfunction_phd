@@ -305,4 +305,16 @@ genotypic_table_to_genalex<-function(geno_tab,file,ploidy = 4){
   write.table(tab,file,sep = ";",append = TRUE,quote = FALSE,row.names = FALSE,col.names = FALSE)
 }
 
-
+All_number_loc_ind<-function(locus,genind){
+  # This function calculates the number of allele per individual per locus
+  # locus should be a locus name
+  # genind should be a genind object 
+  #This function could be run other many loci by using function from the apply family
+  all_tab<-as.data.frame(genind@tab)
+  n_all<-all_tab%>%
+    dplyr::select(contains(locus))%>%
+    mutate(sum = rowSums(across(where(is.numeric))))%>%
+    dplyr::select(ncol(.))
+  colnames(n_all)<-locus
+  return(n_all)
+}
