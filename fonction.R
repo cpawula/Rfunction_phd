@@ -275,3 +275,34 @@ safe_write_table<-function(tab,file,sep = "\t", quote = FALSE, row.names = FALSE
   }else{cat("Impossible d'enregistrer car le fichier existe déja")}
 }
 
+genotypic_table_to_genalex<-function(geno_tab,file,ploidy = 4){
+  # geno_tab : path to the genotypic_table output from FDSTools
+  # file : path to where you want to write the new tab
+  # Ploidy should be equal to the A parameter use durign the FDSTools calling process
+  
+  geno_tab$Indiv<-str_remove_all(geno_tab$Indiv,"Polyrosa-")
+  geno_tab$pop<-geno_tab$Indiv
+  geno_tab$pop[geno_tab$pop %>% str_starts("di-")]<-"Diploids"
+  geno_tab$pop[geno_tab$pop %>% str_starts("tetra-")]<-"Tetraploids"  
+  geno_tab$pop[geno_tab$pop %>% str_starts("tri-")]<-"Triploids"  
+  geno_tab$pop[geno_tab$pop %>% str_starts("penta-")]<-"Pentaploids"
+  geno_tab$pop[geno_tab$pop %>% str_starts("hexa-")]<-"Hexaploids"
+  geno_tab$pop[geno_tab$pop %>% str_starts("hap-")]<-"Haploid"
+  geno_tab$pop[geno_tab$pop %>% str_starts("tneg-")]<-"Tneg"
+  geno_tab<-geno_tab%>%mutate_all(~replace(., is.na(.), 0))
+  geno_tab[geno_tab == "."]<-"0"
+  
+  entete<-str_flatten(c(str_flatten(c((ncol(geno_tab)-2)/ploidy,nrow(geno_tab),length(unique(geno_tab$pop))),collapse = ";"),str_flatten(rep(";",ncol(geno_tab)-3))))
+  second_line<-str_flatten(rep(";",ncol(geno_tab)-1))
+  genalex_colname<-str_flatten(c(c("Ind",";","Pop",";"), str_flatten(markers,collapse = str_flatten(rep(";",ploidy))),str_flatten(rep(";",ploidy-1))))
+  markers<-colnames(geno_tab)[str_which(colnames(geno_tab),"SSRseq")]
+  
+  tab<-dplyr::select(geno_tab,c(1,ncol(geno_tab),2:ncol(geno_tab)-1))
+  
+  write(entete,file,sep = ";",append = FALSE)
+  write(second_line,file,sep = ";",append = TRUE,ncolumns = 3)
+  write(genalex_colname,file,sep = "",append = TRUE)
+  write.table(tab,file,sep = ";",append = TRUE,quote = FALSE,row.names = FALSE,col.names = FALSE)
+}
+
+
