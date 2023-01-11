@@ -295,6 +295,7 @@ genotypic_table_to_genalex<-function(geno_tab,file,ploidy = 4){
   entete<-str_flatten(c(str_flatten(c((ncol(geno_tab)-2)/ploidy,nrow(geno_tab),length(unique(geno_tab$pop))),collapse = ";"),str_flatten(rep(";",ncol(geno_tab)-3))))
   second_line<-str_flatten(rep(";",ncol(geno_tab)-1))
   markers<-colnames(geno_tab)[str_which(colnames(geno_tab),"SSRseq")]
+  markers<-str_remove(markers, "SSRseq_Rosa_")
   genalex_colname<-str_flatten(c(c("Ind",";","Pop",";"), str_flatten(markers,collapse = str_flatten(rep(";",ploidy))),str_flatten(rep(";",ploidy-1))))
  
   
