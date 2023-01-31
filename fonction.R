@@ -31,16 +31,30 @@
 #***********************************************************************************************************************
 #####Formatage des données#####
 
-reformat_ssrseq_gt<-function(tab){
+reformat_ssrseq_gt<-function(tab,ploidy = 4){
   # Cette fonction change le format du tableau de genotype donne en sortie du script de genotypage des individus
+  #It can handle tetraploid and hexaploid genotypic table
   tab_reform<-select(tab,1)%>%
     add_column(pop = "pls_enter", region = "pls_enter")
-  for (i in seq(2,ncol(tab))) {
-    newcolname<-str_replace_all(colnames(tab)[i],c("SSRseq_Rosa_" = "","_1._2._3._4" = ""))
-    newcolnames<-c(paste0(newcolname,"_1"),paste0(newcolname,"_2"),paste0(newcolname,"_3"),paste0(newcolname,"_4"))
-    splited<-str_split_fixed(tab[,i],"/",4)
-    tab_reform[newcolnames]<-splited
+  
+  if (ploidy == 4) {
+    for (i in seq(2,ncol(tab))) {
+      newcolname<-str_replace_all(colnames(tab)[i],c("SSRseq_Rosa_" = "","_1._2._3._4" = ""))
+      newcolnames<-c(paste0(newcolname,"_1"),paste0(newcolname,"_2"),paste0(newcolname,"_3"),paste0(newcolname,"_4"))
+      splited<-str_split_fixed(tab[,i],"/",ploidy)
+      tab_reform[newcolnames]<-splited
+    }
   }
+  
+  if (ploidy == 6) {
+    for (i in seq(2,ncol(tab))) {
+      newcolname<-str_replace_all(colnames(tab)[i],c("SSRseq_Rosa_" = "","_1._2._3._4._5._6" = ""))
+      newcolnames<-c(paste0(newcolname,"_1"),paste0(newcolname,"_2"),paste0(newcolname,"_3"),paste0(newcolname,"_4"),paste0(newcolname,"_5"),paste0(newcolname,"_6"))
+      splited<-str_split_fixed(tab[,i],"/",ploidy)
+      tab_reform[newcolnames]<-splited
+    }
+  }
+  
   return(tab_reform)
 }
 
