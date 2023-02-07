@@ -334,3 +334,11 @@ All_number_loc_ind<-function(locus,genind){
   colnames(n_all)<-locus
   return(n_all)
 }
+
+# use to put the diag value in a matrix as NA
+diagNA <- function(matrix) {
+  
+  diag(matrix)=NA
+  return(matrix)
+}
+
