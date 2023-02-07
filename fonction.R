@@ -342,3 +342,33 @@ diagNA <- function(matrix) {
   return(matrix)
 }
 
+multiple_pairwise_dist<-function(genind,meth){
+  # Cette fonction sert à calculer d'un coup plusieurs distances entre individus
+  # Elle permet de produire un tableau récaptulatif qui rendra la visualisation facile
+  list_dist<-list()
+  u<-1
+  for (i in meth) {
+    dist_ind<-dist(genind, method = i, diag = TRUE)
+    
+    diagNA <- function(matrix) {
+      
+      diag(matrix)=NA
+      return(matrix)
+    }
+    dist_ind_diag<-as.matrix(dist_ind)%>%
+      diagNA()
+    dist_ind_diag[lower.tri(dist_ind_diag)]<-NA
+    
+    dist_ind_tab<-as.data.frame(as.table(dist_ind_diag))%>%
+      dplyr::filter(!is.na(Freq))%>%
+      mutate(comp = paste(Var1 , Var2,sep = "_"))
+    dist_ind_tab$meth<-i
+    list_dist[[u]]<-dist_ind_tab
+    u<-u+1
+  }
+  tab_recap<-list_dist %>% bind_rows()
+  return(tab_recap)
+  
+}
+
+
