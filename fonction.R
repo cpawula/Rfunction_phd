@@ -371,4 +371,37 @@ multiple_pairwise_dist<-function(genind,meth){
   
 }
 
+fine_find_eucli_index<-function(dist){
+  # This function is use to find the power value that should be used to obtain euclidean distance from a non euclidean distance
+  find_euclid_index<-function(dist,min_index,max_index, by = 0.1){
+    res_tab<-as.data.frame(seq(min_index,max_index,by = by))%>%
+      `colnames<-`(c("value_to_try"))
+    def_euclid_index<-function(power,dist){
+      is.euclid(dist^power)[1]
+    }
+    res_tab<-res_tab%>%
+      group_by(value_to_try)%>%
+      mutate(euclid_TRUE = def_euclid_index(value_to_try,dist = dist))%>%
+      ungroup()
+    
+    min_values<-res_tab%>%filter(euclid_TRUE == TRUE)
+    min_value<-max(min_values$value_to_try )
+    max_value<-res_tab%>%filter(euclid_TRUE == FALSE)
+    max_value<-min(max_value$value_to_try )
+    index_value<-min(min_values$value_to_try)
+    return(c(min_value,max_value,index_value))
+  }
+  
+  min_index=0
+  max_index=1
+  for (i in c(0.1,0.01,0.001,0.0001,0.00001)) {
+    index_test<-find_euclid_index(dist,min_index,max_index,by = i)
+    min_index<-index_test[1]
+    max_index<-index_test[2]
+    print(min_index)
+  }
+  print(index_test[3])
+  return(index_test[3])
+  
+}
 
