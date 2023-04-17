@@ -384,9 +384,9 @@ fine_find_eucli_index<-function(dist){
       mutate(euclid_TRUE = def_euclid_index(value_to_try,dist = dist))%>%
       ungroup()
     
-    min_values<-res_tab%>%filter(euclid_TRUE == TRUE)
+    min_values<-res_tab%>%dplyr::filter(euclid_TRUE == TRUE)
     min_value<-max(min_values$value_to_try )
-    max_value<-res_tab%>%filter(euclid_TRUE == FALSE)
+    max_value<-res_tab%>%dplyr::filter(euclid_TRUE == FALSE)
     max_value<-min(max_value$value_to_try )
     index_value<-min(min_values$value_to_try)
     return(c(min_value,max_value,index_value))
