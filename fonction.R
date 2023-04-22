@@ -104,10 +104,14 @@ Quickboard<-function(data){
   write.table(data, "clipboard", sep="\t", col.names=TRUE, quote = F,row.names = FALSE)
 }
 # https://gist.github.com/zkamvar/aeaff83b9d126d55aade
-gen2polysat <- function(gen, newploidy = gen@ploidy){
+gen2polysat <- function(gen, newploidy = gen@ploidy, allele_pheno = FALSE){
   if (!require(polysat)){
     stop("User needs polysat installed")
   }
+  if (allele_pheno == TRUE){
+    gen$tab[gen$tab>1]<-1
+  }
+  
   gen   <- recode_polyploids(gen, newploidy)
   gendf <- genind2df(gen, sep = "/", usepop = FALSE)
   gendf <- lapply(gendf, strsplit, "/")
@@ -117,6 +121,9 @@ gen2polysat <- function(gen, newploidy = gen@ploidy){
     res <- lapply(gendf[[i]], function(x) ifelse(is.na(x), Missing(ambig), x))
     Genotypes(ambig, loci = i) <- res
   }
+  PopNames(ambig)<-as.character(pop(gen))
+  PopInfo(ambig)<-as.factor(pop(gen))
+  Ploidies(ambig)<-ploidy(gen)
   return(ambig)
 }
 
