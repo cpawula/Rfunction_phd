@@ -111,8 +111,7 @@ gen2polysat <- function(gen, newploidy = gen@ploidy, allele_pheno = FALSE){
   if (allele_pheno == TRUE){
     gen$tab[gen$tab>1]<-1
   }
-  
-  gen   <- recode_polyploids(gen, newploidy)
+  # gen   <- recode_polyploids(gen, newploidy)
   gendf <- genind2df(gen, sep = "/", usepop = FALSE)
   gendf <- lapply(gendf, strsplit, "/")
   gendf <- lapply(gendf, lapply, as.numeric)
@@ -121,8 +120,8 @@ gen2polysat <- function(gen, newploidy = gen@ploidy, allele_pheno = FALSE){
     res <- lapply(gendf[[i]], function(x) ifelse(is.na(x), Missing(ambig), x))
     Genotypes(ambig, loci = i) <- res
   }
-  PopNames(ambig)<-as.character(pop(gen))
-  PopInfo(ambig)<-as.factor(pop(gen))
+  PopNames(ambig)<-unique(as.character(pop(gen)))
+  PopInfo(ambig)<-as.character(pop(gen))
   Ploidies(ambig)<-ploidy(gen)
   return(ambig)
 }
